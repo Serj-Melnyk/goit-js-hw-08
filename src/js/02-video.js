@@ -5,22 +5,26 @@ import Player from '@vimeo/player';
 const frame = document.querySelector('#vimeo-player');
 const player = new Player(frame);
 
-// console.log(frame);
-// console.log(player);
+const LOCALSTORAGE_KEY = 'videoplayer-current-time';
 
-// const onPlay = function (data) {
-//   // data is an object containing properties specific to that event
-// };
-
-player.on('timeupdate', throttle(dataTime, 1000));
-
-function dataTime(data) {
-  // console.log(data);
-  localStorage.setItem('videoplayer-current-time', data.seconds);
+function savedTime(data) {
+  console.log(data.seconds);
+  localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(data.seconds));
 }
-player.on('play', data => {
-  const savedTime = localStorage.getItem('videoplayer-current-time');
-  if (data.seconds !== savedTime) {
-    player.setCurrentTime(savedTime);
-  }
-});
+
+player.on('timeupdate', throttle(savedTime, 1000));
+
+const startTime = localStorage.getItem(LOCALSTORAGE_KEY);
+
+player
+  .setCurrentTime(startTime)
+  .then(function (seconds) {})
+  .catch(function (error) {
+    switch (error.name) {
+      case 'RangeError':
+        break;
+
+      default:
+        break;
+    }
+  });
