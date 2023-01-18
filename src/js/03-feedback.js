@@ -5,7 +5,7 @@ const email = document.querySelector('input');
 const message = document.querySelector('textarea');
 const submitButoon = document.querySelector('button');
 const FEEDBACK_KEY = 'feedback-form-state';
-const data = {};
+const data = { email: '', message: '' };
 
 email.addEventListener('input', addData);
 message.addEventListener('input', addData);
