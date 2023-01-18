@@ -1,54 +1,44 @@
 import throttle from 'lodash.throttle';
 
 const form = document.querySelector('.feedback-form');
-const textarea = document.querySelector('.feedback-form textarea ');
-const input = document.querySelector('.feedback-form input ');
+const email = document.querySelector('input');
+const message = document.querySelector('textarea');
+const submitButoon = document.querySelector('button');
 const FEEDBACK_KEY = 'feedback-form-state';
+const data = {};
 
-form.addEventListener('submit', onSubmit);
-textarea.addEventListener('input', throttle(onTextarea, 500));
-input.addEventListener('input', onInput);
+email.addEventListener('input', addData);
+message.addEventListener('input', addData);
+submitButoon.addEventListener('click', sendData);
 
-function onSubmit(evt) {
-  evt.preventDefault();
+checkData();
 
-  const { email, message } = evt.currentTarget.elements;
-
-  const obj = {
-    email: email.value,
-    message: message.value,
-  };
-  localStorage.setItem(FEEDBACK_KEY, JSON.stringify(obj));
-
-  if (email.value.trim() === '' || message.value.trim() === '') {
-    alert(`все поля должны быть заполнены`);
-  } else console.log(obj);
-
-  form.reset();
-  evt.currentTarget.reset();
-  localStorage.removeItem(FEEDBACK_KEY);
-  return obj;
-}
-
-function onTextarea(evt) {
-  const message = evt.target.value;
-
-  localStorage.setItem(FEEDBACK_KEY, message);
-}
-
-function onInput(evt) {
-  const inputValue = evt.target.value;
-
-  localStorage.setItem(FEEDBACK_KEY, inputValue);
-}
-
-function showTextarea() {
-  const savedMessage = localStorage.getItem(FEEDBACK_KEY);
-
-  if (savedMessage) {
-    textarea.value = savedMessage;
-    // input.value = savedMessage;
+function checkData() {
+  const localData = JSON.parse(localStorage.getItem(FEEDBACK_KEY));
+  if (localData) {
+    email.value = localData.email;
+    message.value = localData.message;
+    data.email = localData.email;
+    data.message = localData.message;
   }
 }
 
-showTextarea();
+const saveData = throttle(function () {
+  localStorage.setItem(FEEDBACK_KEY, JSON.stringify(data));
+}, 500);
+
+function addData(event) {
+  data[this.name] = event.target.value;
+  saveData();
+}
+
+function sendData(event) {
+  event.preventDefault();
+  const localData = JSON.parse(localStorage.getItem(FEEDBACK_KEY));
+  if (!email.value.trim() || !message.value.trim()) {
+    alert(`все поля должны быть заполнены`);
+  } else console.log(localData);
+
+  form.reset();
+  localStorage.removeItem(FEEDBACK_KEY);
+}
