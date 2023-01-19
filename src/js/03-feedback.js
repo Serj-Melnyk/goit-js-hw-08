@@ -1,44 +1,55 @@
 import throttle from 'lodash.throttle';
 
 const form = document.querySelector('.feedback-form');
-const email = document.querySelector('input');
-const message = document.querySelector('textarea');
-const submitButoon = document.querySelector('button');
+const textarea = document.querySelector('.feedback-form textarea ');
+const input = document.querySelector('.feedback-form input ');
 const FEEDBACK_KEY = 'feedback-form-state';
-const data = { email: '', message: '' };
 
-email.addEventListener('input', addData);
-message.addEventListener('input', addData);
-submitButoon.addEventListener('click', sendData);
+form.addEventListener('submit', onSubmit);
 
-checkData();
+function onSubmit(evt) {
+  evt.preventDefault();
 
-function checkData() {
-  const localData = JSON.parse(localStorage.getItem(FEEDBACK_KEY));
-  if (localData) {
-    email.value = localData.email;
-    message.value = localData.message;
-    data.email = localData.email;
-    data.message = localData.message;
-  }
-}
+  const { email, message } = evt.currentTarget.elements;
 
-const saveData = throttle(function () {
-  localStorage.setItem(FEEDBACK_KEY, JSON.stringify(data));
-}, 500);
+  const obj = {
+    email: email.value,
+    message: message.value,
+  };
+  localStorage.setItem(FEEDBACK_KEY, JSON.stringify(obj));
 
-function addData(event) {
-  data[this.name] = event.target.value;
-  saveData();
-}
-
-function sendData(event) {
-  event.preventDefault();
-  const localData = JSON.parse(localStorage.getItem(FEEDBACK_KEY));
-  if (!email.value.trim() || !message.value.trim()) {
+  if (email.value.trim() === '' || message.value.trim() === '') {
     alert(`все поля должны быть заполнены`);
-  } else console.log(localData);
+  } else console.log(obj);
 
   form.reset();
+  evt.currentTarget.reset();
   localStorage.removeItem(FEEDBACK_KEY);
+  formData.email = '';
+  formData.message = '';
 }
+
+const formData = {};
+
+form.addEventListener('input', throttle(saveData, 500));
+
+function saveData(evt) {
+  formData[evt.target.name] = evt.target.value;
+  localStorage.setItem(FEEDBACK_KEY, JSON.stringify(formData));
+
+  // console.log(formData.email);
+  // console.log(formData.message);
+}
+
+function showTextarea() {
+  try {
+    const savedMessage = JSON.parse(localStorage.getItem(FEEDBACK_KEY)) || '';
+    // console.log(savedMessage);
+
+    formData.email = savedMessage.email || '';
+    formData.message = savedMessage.message || '';
+    input.value = savedMessage.email || '';
+    textarea.value = savedMessage.message || '';
+  } catch (error) {}
+}
+showTextarea();
